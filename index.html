@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hatchling Realms">
+<meta name="theme-color" content="#0f3b63">
+<title>Hatchling Realms</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: one centered column per screen over a realm scene; big touch targets for iPad. */
+:root{--ink:#fff;--soft:rgba(255,255,255,.8);--card:rgba(12,18,48,.55);--card2:rgba(255,255,255,.14);--line:rgba(255,255,255,.3);--good:#7ce3a1;--oops:#ffb4a2;--gold:#ffd166;--navy:#0b1b3a;--sky1:#0f3b63;--sky2:#3aa6c9;--accent:#7fe3ff;--display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;--body:'Nunito',system-ui,sans-serif;color-scheme:dark}
+#app[data-realm="1"]{--sky1:#3b2a1f;--sky2:#a8793f;--accent:#ffd27a}
+#app[data-realm="2"]{--sky1:#3a0d12;--sky2:#d9552a;--accent:#ffb35c}
+#app[data-realm="3"]{--sky1:#2f2d6e;--sky2:#8fb0ee;--accent:#f1eeff}
+html,body{height:100%}
+body{margin:0;background:#0f3b63;color:var(--ink);font-family:var(--body);font-weight:600;font-size:17px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#app{min-height:100%;position:relative;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2))}
+.scene{position:absolute;left:0;right:0;bottom:0;height:40%;pointer-events:none}
+.scene svg{width:100%;height:100%;display:block}
+.wrap{position:relative;max-width:760px;margin:0 auto;padding-block:16px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+h1,.title{font-family:var(--display);font-weight:800;font-size:clamp(2rem,7vw,3rem);line-height:1.05;margin:6px 0 0;text-align:center;text-wrap:balance}
+.title.sm{font-size:1.8rem}
+.sub{color:var(--soft);margin:2px 0 0;text-align:center}
+.top .sub{text-align:left}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.who{font-family:var(--display);font-size:1.5rem}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:5px 12px;display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:.95rem}
+.ic{width:18px;height:18px}
+.btn{font-family:var(--display);font-weight:800;font-size:1.2rem;color:var(--navy);background:var(--accent);border:0;border-radius:18px;padding:12px 20px;min-height:56px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.3)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.btn.ghost{background:var(--card2);color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.sm{min-height:44px;font-size:1rem;padding:8px 14px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+button:focus-visible,input:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.pick{font:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;cursor:pointer;min-height:190px;justify-content:center}
+.pick b{font-family:var(--display);font-size:1.4rem}
+.plus{font-size:3rem;line-height:1;font-family:var(--display)}
+.hero{display:flex;flex-direction:column;align-items:center;gap:8px}
+.pet{animation:bob 3.2s ease-in-out infinite}
+.bubble{background:#fff;color:var(--navy);border-radius:18px;padding:10px 16px;max-width:30ch;text-align:center;font-weight:800}
+.bar{height:14px;border-radius:9px;background:rgba(255,255,255,.22);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:9px}
+.xpline{display:flex;justify-content:space-between;font-size:.9rem;color:var(--soft);margin-top:4px}
+.quests{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.quest{font:inherit;color:var(--ink);text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.quest b{font-family:var(--display);font-size:1.3rem}
+.quest span{color:var(--soft);font-size:.95rem}
+.quest[disabled]{opacity:.55;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.form{display:flex;flex-direction:column;gap:10px}
+.form label{font-weight:800;margin-top:6px}
+input{font:inherit;font-weight:800;font-size:1.4rem;border-radius:14px;border:2px solid var(--line);background:rgba(255,255,255,.95);color:var(--navy);padding:10px 14px;min-height:52px;width:100%;box-sizing:border-box}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{font:inherit;font-family:var(--display);font-size:1.2rem;color:var(--ink);background:var(--card2);border:2px solid var(--line);border-radius:16px;padding:8px 16px;min-height:48px;cursor:pointer}
+.chip.on{background:var(--accent);color:var(--navy);border-color:#fff}
+.chip.egg{display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 10px}
+.dots{display:flex;gap:6px}
+.d{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.25)}
+.d.on{background:var(--gold)}.d.cur{outline:2px solid #fff}
+.stage{display:flex;flex-direction:column;align-items:center;gap:10px}
+.qcard{width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:12px}
+.q{font-family:var(--display);font-weight:800;font-size:clamp(2.4rem,10vw,4rem);text-align:center}
+.ansbox{min-width:140px;min-height:64px;text-align:center;font-family:var(--display);font-size:2.6rem;background:rgba(255,255,255,.95);color:var(--navy);border-radius:16px;padding:2px 18px}
+.pad{display:grid;grid-template-columns:repeat(3,76px);gap:10px}
+.pad .btn{padding:6px;font-size:1.6rem}
+.clock{width:190px;max-width:60vw}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.opts .btn{font-size:1.6rem}
+.blanks{font-family:var(--display);font-size:2.2rem;letter-spacing:.2em;min-height:44px}
+.slots{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:62px}
+.slot{width:46px;height:58px;border-bottom:4px solid var(--line);display:flex;align-items:flex-end;justify-content:center}
+.tile{font-family:var(--display);font-weight:800;font-size:1.8rem;min-width:52px;height:56px;border-radius:14px;border:0;background:var(--accent);color:var(--navy);box-shadow:0 4px 0 rgba(0,0,0,.3);cursor:pointer}
+.tile.gone{visibility:hidden}
+.fb{width:100%;box-sizing:border-box;border-radius:16px;padding:12px 16px;text-align:center;font-weight:800;color:var(--navy)}
+.fb.good{background:var(--good)}.fb.oops{background:var(--oops)}
+.fb .big{font-family:var(--display);font-size:2rem;letter-spacing:.12em;display:block}
+.bad{color:#b3261e;text-decoration:underline}
+.stars{display:flex;gap:6px;justify-content:center}
+.stars svg{width:44px;height:44px}
+.list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.list li{background:var(--card2);border-radius:12px;padding:10px 14px;font-weight:800}
+.badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.badge{border:2px solid var(--line);border-radius:16px;padding:10px;text-align:center}
+.badge b{display:block;font-family:var(--display)}
+.badge span{font-size:.85rem;color:var(--soft)}
+.badge.off{opacity:.45}
+.shop{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:6px 0}
+.test{border:2px dashed var(--accent)}
+.cf{position:fixed;top:-14px;width:10px;height:14px;z-index:50;pointer-events:none;animation:fall 1.5s ease-in forwards}
+.foes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.foe{font:inherit;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.foe b{font-family:var(--display);font-size:1.25rem}
+.foe small,.side small{color:var(--soft);font-weight:800}
+.tag{display:inline-block;border-radius:99px;padding:2px 12px;font-weight:800;font-size:.85rem;background:var(--card2);border:1px solid var(--line)}
+.tag.easy{background:var(--good);color:var(--navy)}.tag.even{background:var(--gold);color:var(--navy)}.tag.hard{background:var(--oops);color:var(--navy)}.tag.no{background:#ff6b6b;color:#fff}
+.hp{height:16px;border-radius:9px;background:rgba(255,255,255,.22);overflow:hidden;width:100%}
+.hp i{display:block;height:100%;background:var(--good);border-radius:9px;transition:width .4s}
+.hp.foehp i{background:#ff8a80}
+.side{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:420px}
+.arena{display:flex;flex-direction:column;align-items:center;gap:10px}
+.abils{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.abil{min-height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;padding:8px}
+.abil small{font-family:var(--body);font-size:.8rem;font-weight:800;opacity:.85}
+.warn{background:var(--gold);color:var(--navy);border-radius:14px;padding:8px 14px;font-weight:800;text-align:center}
+.gate{border:2px solid var(--gold)}
+.shake{animation:wob .45s}
+.passage{background:rgba(255,255,255,.95);color:var(--navy);border-radius:16px;padding:14px 18px;font-size:1.15rem;line-height:1.55;font-weight:700;max-width:62ch;width:100%;box-sizing:border-box}
+.prompt{font-family:var(--display);font-weight:800;font-size:1.5rem;text-align:center;text-wrap:balance}
+.seq{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.slotq{width:56px;height:56px;border:3px dashed var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:1.8rem}
+.opts.txt .btn{font-size:1.15rem;font-weight:700;font-family:var(--body);min-height:64px;line-height:1.2}
+.opts.col1{grid-template-columns:1fr}
+.fb svg{vertical-align:middle}
+.cheer{animation:hop .6s}.wobble{animation:wob .5s}
+@keyframes bob{50%{transform:translateY(-6px)}}
+@keyframes hop{30%{transform:translateY(-22px) scale(1.05)}}
+@keyframes wob{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.9}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------- game data and logic (no DOM) ---------- */
+var KEY='hatchling-realms-v1';
+var TYPES={ember:{name:'Ember',c1:'#ff8a3d',c2:'#ffc78a',dk:'#a8391a'},tide:{name:'Tide',c1:'#3ea6e8',c2:'#9fe6ff',dk:'#17609e'},stone:{name:'Stone',c1:'#a08258',c2:'#e3c88d',dk:'#5a4226'},gust:{name:'Gust',c1:'#a99bf0',c2:'#e9e4ff',dk:'#5b4bbd'}};
+var REALMS=[{n:'Tide Pools'},{n:'Crystal Canyon'},{n:'Ember Peak'},{n:'Cloud Isles'}];
+var TITLES=['Cadet','Scout','Ranger','Captain','Commander'];
+var ACC={crown:{n:'Star Crown',cost:6},scarf:{n:'Red Scarf',cost:10},glasses:{n:'Round Glasses',cost:14}};
+var MAXL={math:16,spell:8,miss:8,clock:4,vocab:8,logic:8};
+var MATH_TOPICS=['Add to 10','Add and subtract to 20','Add and subtract to 100','Times 2, 5, 10','Times tables','Big add and subtract','Division','2-digit × 1-digit','2-digit × 2-digit','Long division','Powers and roots','Percentages','Decimals','Fractions','Equations','Harder equations'];
+var START={1:{math:1,spell:1,miss:1,clock:1,vocab:1,logic:1},2:{math:2,spell:2,miss:2,clock:2,vocab:2,logic:2},3:{math:4,spell:3,miss:3,clock:3,vocab:3,logic:3},4:{math:7,spell:4,miss:6,clock:4,vocab:5,logic:5}};
+var WORDS={
+1:['cat','dog','sun','hat','bed','pig','red','cup','map','bus','fox','pen'],
+2:['frog','jump','milk','tree','fish','star','rain','book','ship','cake','moon','bird'],
+3:['apple','happy','water','green','house','plant','smile','train','eight','sleep','cloud','tiger'],
+4:['because','friend','school','people','garden','orange','mother','spring','planet','bridge','window','animal'],
+5:['library','science','journey','weather','through','thought','morning','machine','kitchen','mountain','strange','pattern'],
+6:['beautiful','different','favorite','language','question','surprise','calendar','exercise','separate','adventure','knowledge','important'],
+7:['necessary','restaurant','vegetable','government','environment','temperature','neighbor','interesting','experience','dangerous'],
+8:['embarrass','conscience','occasionally','rhythm','privilege','accommodate','definitely','guarantee','committee','perseverance']};
+
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function levelOf(xp){return Math.floor(Math.sqrt(xp/20))+1;}
+function xpFor(L){return 20*(L-1)*(L-1);}
+function stageOf(xp){var L=levelOf(xp);return xp<30?0:L<4?1:L<8?2:3;}
+function realmOf(xp){return Math.min(3,Math.floor((levelOf(xp)-1)/3));}
+function titleOf(xp){return TITLES[Math.min(4,Math.floor((levelOf(xp)-1)/2))];}
+
+function calc(a,op,b){return op==='+'?a+b:op==='-'?a-b:op==='×'?a*b:a/b;}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a;}
+function sup(n){return String(n).split('').map(function(d){return '⁰¹²³⁴⁵⁶⁷⁸⁹'.charAt(+d);}).join('');}
+function sgn(n){return n<0?'− '+(-n):'+ '+n;}
+function fr(n,d){var g=gcd(n,d);n/=g;d/=g;return {s:d===1?String(n):n+'/'+d,v:n/d};}
+function trimNum(x,dp){return String(+x.toFixed(dp));}
+function parseAns(s){
+  s=String(s).trim();var m=s.match(/^(-?\d+)\/(\d+)$/);
+  if(m)return +m[2]===0?NaN:(+m[1])/(+m[2]);
+  return /^-?(\d+\.?\d*|\.\d+)$/.test(s)?Number(s):NaN;
+}
+function close(v,ans){return !isNaN(v)&&Math.abs(v-ans)<1e-6;}
+function hardQ(l){
+  var q={note:''},a,b,c,d,x,t,f;
+  if(l===9){a=ri(12,49);b=ri(11,29);q.text=a+' × '+b+' = ?';q.ans=a*b;}
+  else if(l===10){b=ri(3,19);c=ri(12,60);q.text=(b*c)+' ÷ '+b+' = ?';q.ans=c;}
+  else if(l===11){t=ri(1,4);
+    if(t===1){a=ri(2,15);q.text=a+'² = ?';q.ans=a*a;}
+    else if(t===2){a=ri(2,6);q.text=a+'³ = ?';q.ans=a*a*a;}
+    else if(t===3){a=ri(2,10);q.text='2'+sup(a)+' = ?';q.ans=Math.pow(2,a);}
+    else{a=ri(2,15);q.text='√'+(a*a)+' = ?';q.ans=a;}}
+  else if(l===12){a=pick([5,10,15,20,25,30,40,50,75]);t=ri(1,3);b=ri(1,12)*(100/gcd(a,100));
+    if(t===1){q.text=a+'% of '+b+' = ?';q.ans=a*b/100;}
+    else if(t===2){q.text=(a*b/100)+' is what percent of '+b+'?';q.ans=a;q.note='Answer as a number, like 25';}
+    else{q.text='Price '+b+', '+a+'% off. New price?';q.ans=b-a*b/100;}}
+  else if(l===13){t=ri(1,4);
+    if(t===1){a=ri(11,99);b=ri(11,99);q.text=(a/10).toFixed(1)+' + '+(b/10).toFixed(1)+' = ?';q.ans=(a+b)/10;}
+    else if(t===2){a=ri(300,999);b=ri(110,a-1);q.text=(a/100).toFixed(2)+' − '+(b/100).toFixed(2)+' = ?';q.ans=(a-b)/100;}
+    else if(t===3){a=ri(11,99);c=ri(2,9);q.text=(a/10).toFixed(1)+' × '+c+' = ?';q.ans=a*c/10;}
+    else{a=ri(11,99);c=ri(2,9);q.text=(a*c/10).toFixed(1)+' ÷ '+c+' = ?';q.ans=a/10;}
+    q.note='Use a decimal point';}
+  else if(l===14){
+    do{
+      t=ri(1,3);b=pick([2,3,4,5,6]);d=pick([2,3,4,6,8,10,12]);a=ri(1,b-1);c=ri(1,d-1);
+      if(t===1){f=fr(a*d+c*b,b*d);q.text=a+'/'+b+' + '+c+'/'+d+' = ?';}
+      else if(t===2){if(a*d<c*b){var tn=a,td=b;a=c;b=d;c=tn;d=td;}f=fr(a*d-c*b,b*d);q.text=a+'/'+b+' − '+c+'/'+d+' = ?';}
+      else{f=fr(a*c,b*d);q.text=a+'/'+b+' × '+c+'/'+d+' = ?';}
+    }while(f.v===0);
+    q.ans=f.v;q.disp=f.s;q.note='Answer as a fraction, like 7/8';}
+  else if(l===15){t=ri(1,3);x=ri(2,12);
+    if(t===1){a=ri(2,9);b=ri(1,20);q.text=a+'x + '+b+' = '+(a*x+b);}
+    else if(t===2){a=ri(2,9);b=ri(1,Math.min(15,a*x-1));q.text=a+'x − '+b+' = '+(a*x-b);}
+    else{a=ri(2,6);x=a*ri(2,10);b=ri(1,12);q.text='x/'+a+' + '+b+' = '+(x/a+b);}
+    q.ans=x;q.note='Solve for x';}
+  else{t=ri(1,2);
+    if(t===1){
+      do{a=ri(3,9);c=ri(1,a-1);x=ri(-8,12);if(x===0)x=5;b=ri(-12,12);if(b===0)b=4;d=b+(a-c)*x;}while(d===0);
+      q.text=a+'x '+sgn(b)+' = '+(c===1?'':c)+'x '+sgn(d);}
+    else{a=ri(2,9);b=ri(1,9);x=ri(-5,10);q.text=a+'(x '+sgn(b)+') = '+(a*(x+b));}
+    q.ans=x;q.note='Solve for x. The − key makes a negative.';}
+  if(q.disp===undefined)q.disp=trimNum(+q.ans,4);
+  return q;
+}
+function mathQ(l){
+  if(l>8)return hardQ(l);
+  var a,b,op,q;
+  if(l===1){a=ri(1,9);b=ri(1,10-a);op='+';}
+  else if(l===2){if(Math.random()<.5){a=ri(3,12);b=ri(2,20-a);op='+';}else{a=ri(8,20);b=ri(1,a-1);op='-';}}
+  else if(l===3){if(Math.random()<.5){a=ri(10,60);b=ri(5,99-a);op='+';}else{a=ri(20,99);b=ri(5,a-1);op='-';}}
+  else if(l===4){a=pick([2,5,10]);b=ri(1,10);op='×';}
+  else if(l===5){a=ri(2,10);b=ri(2,10);op='×';}
+  else if(l===6){if(Math.random()<.5){a=ri(100,800);b=ri(50,999-a);op='+';}else{a=ri(200,999);b=ri(50,a-1);op='-';}}
+  else if(l===7){b=ri(2,10);q=ri(2,10);a=b*q;op='÷';}
+  else{a=ri(12,99);b=ri(3,9);op='×';}
+  var ans=calc(a,op,b);
+  return {a:a,b:b,op:op,ans:ans,text:a+' '+op+' '+b+' = ?'};
+}
+function missingQ(l){
+  var q=mathQ(Math.min(l,8));
+  return {text:q.a+' '+q.op+' ? = '+q.ans,ans:q.b};
+}
+var FIVES=[0,5,10,15,20,25,30,35,40,45,50,55];
+function fmt(h,m){return h+':'+(m<10?'0':'')+m;}
+function clockQ(l){
+  var h=ri(1,12),m=l===1?0:l===2?pick([0,30]):l===3?pick([0,15,30,45]):pick(FIVES);
+  var ans=fmt(h,m),opts={};opts[ans]=1;
+  while(Object.keys(opts).length<4){
+    var h2=Math.random()<.5?h:ri(1,12);
+    var m2=Math.random()<.5?m:(l===1?0:pick(FIVES));
+    opts[fmt(h2,m2)]=1;
+  }
+  return {h:h,m:m,ans:ans,opts:shuffle(Object.keys(opts))};
+}
+function wordQ(p){
+  var due=p.missed.filter(function(m){return m.due<=p.total;});
+  if(due.length){var m=due[0];p.missed=p.missed.filter(function(x){return x!==m;});return m.w;}
+  var list=WORDS[Math.min(8,p.skills.spell.lvl)],recent=p.recent||[],c,t=0;
+  do{c=pick(list);t++;}while(recent.indexOf(c)>=0&&t<30);
+  p.recent=recent.concat(c).slice(-6);
+  return c;
+}
+/* Adaptive rule: 4 right in a row moves up; 2 misses in the last 3 moves down. */
+function record(sk,ok,max){
+  sk.hist.push(ok?1:0);if(sk.hist.length>6)sk.hist.shift();
+  var h=sk.hist,n=h.length;
+  if(n>=4&&h.slice(-4).every(function(x){return x===1;})&&sk.lvl<max){sk.lvl++;sk.hist=[];return 'up';}
+  if(n>=3&&h.slice(-3).filter(function(x){return x===0;}).length>=2&&sk.lvl>1){sk.lvl--;sk.hist=[];return 'down';}
+  return null;
+}
+function newProfile(name,type,cname,band){
+  return {name:name,type:type,cname:cname,band:band,xp:0,grp:{n:0,w:0},beaten:[],wins:0,losses:0,gems:0,days:0,last:'',best:0,total:0,badges:[],owned:[],worn:[],missed:[],recent:[],
+    pref:{spell:band===1?'tiles':'type'},
+    skills:{math:{lvl:START[band].math,hist:[]},spell:{lvl:START[band].spell,hist:[]},miss:{lvl:START[band].miss,hist:[]},clock:{lvl:START[band].clock,hist:[]},vocab:{lvl:START[band].vocab,hist:[]},logic:{lvl:START[band].logic,hist:[]}}};
+}
+var BADGES=[
+ {id:'hatch',n:'First Hatch',d:'Hatch your egg',t:function(p){return stageOf(eff(p))>=1;}},
+ {id:'a1',n:'First Victory',d:'Win a battle',t:function(p){return p.beaten.length>=1;}},
+ {id:'a5',n:'Arena Hero',d:'Beat 5 different foes',t:function(p){return p.beaten.length>=5;}},
+ {id:'a9',n:'Arena Champion',d:'Beat every foe',t:function(p){return p.beaten.length>=FOES.length;}},
+ {id:'v6',n:'Bookworm',d:'Reach Word Detective challenge 6',t:function(p){return p.skills.vocab.lvl>=6;}},
+ {id:'l6',n:'Puzzle Master',d:'Reach Puzzle challenge 6',t:function(p){return p.skills.logic.lvl>=6;}},
+ {id:'s5',n:'On Fire',d:'5 right in a row',t:function(p){return p.best>=5;}},
+ {id:'a50',n:'50 Answers',d:'Answer 50 questions',t:function(p){return p.total>=50;}},
+ {id:'a200',n:'200 Answers',d:'Answer 200 questions',t:function(p){return p.total>=200;}},
+ {id:'m4',n:'Number Ninja',d:'Reach Number challenge 4',t:function(p){return p.skills.math.lvl>=4;}},
+ {id:'m8',n:'Mental Math Master',d:'Reach Number challenge 8',t:function(p){return p.skills.math.lvl>=8;}},
+ {id:'m12',n:'Percent Pro',d:'Reach Number challenge 12',t:function(p){return p.skills.math.lvl>=12;}},
+ {id:'m16',n:'Algebra Ace',d:'Reach Number challenge 16',t:function(p){return p.skills.math.lvl>=16;}},
+ {id:'w4',n:'Word Wizard',d:'Reach Spelling challenge 4',t:function(p){return p.skills.spell.lvl>=4;}},
+ {id:'r1',n:'Crystal Canyon',d:'Travel to the canyon',t:function(p){return realmOf(eff(p))>=1;}},
+ {id:'r2',n:'Ember Peak',d:'Travel to the volcano',t:function(p){return realmOf(eff(p))>=2;}},
+ {id:'r3',n:'Cloud Isles',d:'Reach the sky islands',t:function(p){return realmOf(eff(p))>=3;}},
+ {id:'d3',n:'3 Days Running',d:'Play 3 days in a row',t:function(p){return p.days>=3;}}];
+/* ---------- realm gates and battle engine (no DOM) ---------- */
+var GATE_SHARE=.3;
+/* A gate sits at every 3rd level (4, 7, 10, ...). To pass it, at least 30% of the XP needed for that
+   level must have come from number quests AND from word quests. Extra XP is banked, never lost. */
+function gateInfo(p){
+  for(var k=1;;k++){
+    var g=xpFor(3*k+1);
+    if(p.xp<g)return {open:true,g:g};
+    var need=GATE_SHARE*g;
+    if(p.grp.n<need||p.grp.w<need)return {open:false,g:g,needN:Math.max(0,Math.ceil(need-p.grp.n)),needW:Math.max(0,Math.ceil(need-p.grp.w))};
+  }
+}
+function eff(p){var gi=gateInfo(p);return gi.open?p.xp:gi.g-1;}
+
+var ABIL=[
+ {id:'strike',lv:3,pow:1,cd:0,desc:'A quick hit'},
+ {id:'guard',lv:5,desc:'Softens the next hit'},
+ {id:'burst',lv:7,pow:1.9,cd:2,desc:'Big hit, then rest'},
+ {id:'mend',lv:10,desc:'Heal a little (2 per fight)'},
+ {id:'ultra',lv:13,pow:3.2,cd:4,desc:'Huge hit, long rest'}];
+var ABIL_NAMES={
+ ember:['Cinder Dart','Ash Shield','Blaze Burst','Warm Mend','Phoenix Rush'],
+ tide:['Bubble Shot','Wave Shield','Tidal Crash','Cool Spring','Storm Surge'],
+ stone:['Pebble Toss','Rock Wall','Crystal Spike','Moss Mend','Quake Slam'],
+ gust:['Air Puff','Wind Veil','Cyclone Spin','Breeze Mend','Sky Dive']};
+var ADV={tide:'ember',ember:'gust',gust:'stone',stone:'tide'};
+var FOES=[
+ {id:'pebblin',n:'Pebblin',el:'stone',lv:3,t:1},{id:'drizzlet',n:'Drizzlet',el:'tide',lv:4,t:2},
+ {id:'cinderbat',n:'Cinder Bat',el:'ember',lv:6,t:3},{id:'gustling',n:'Gustling',el:'gust',lv:7,t:4},
+ {id:'crystalcrab',n:'Crystal Crab',el:'stone',lv:9,t:5},{id:'tidewarden',n:'Tide Warden',el:'tide',lv:11,t:6},
+ {id:'magmahound',n:'Magma Hound',el:'ember',lv:13,t:7},{id:'stormroc',n:'Storm Roc',el:'gust',lv:15,t:8},
+ {id:'hollowking',n:'The Hollow King',el:'ember',lv:17,t:9}];
+var GROW=1.22;
+function gf(L){return Math.pow(GROW,L-1);}
+var EA=1.25,ED=.8,FB=.055;
+function elemMult(a,d){return ADV[a]===d?EA:ADV[d]===a?ED:1;}
+function boost(lv){return lv<5?1:1+FB*(lv-4);}
+function rv(){return .85+Math.random()*.3;}
+function newBattleL(L,type,cname,foe){
+  var hp=Math.round(44*gf(L));
+  return {foe:foe,type:type,cname:cname,lvl:L,hMax:hp,h:hp,atk:8*gf(L),eMax:Math.round(38*gf(foe.lv)*boost(foe.lv)),e:Math.round(38*gf(foe.lv)*boost(foe.lv)),eAtk:7*gf(foe.lv)*boost(foe.lv),
+    cd:{burst:0,ultra:0},mend:2,guard:false,charge:false,sinceCharge:0,turn:0,over:null,turnLog:[],hitFoe:false,hitMe:false};
+}
+function newBattle(p,foe){return newBattleL(levelOf(eff(p)),p.type,p.cname,foe);}
+function enemyAct(b){
+  var f=b.foe,m=elemMult(f.el,b.type),d,msg;
+  b.turn++;
+  if(b.charge){d=b.eAtk*2.2*m*rv();b.charge=false;b.sinceCharge=0;msg=f.n+' unleashes a SLAM! ';}
+  else if(b.sinceCharge>=2){b.charge=true;b.sinceCharge=0;b.turnLog.push(f.n+' is gathering power...');return;}
+  else{d=b.eAtk*m*rv();b.sinceCharge++;msg=f.n+' attacks! ';}
+  if(b.guard){d*=.4;b.guard=false;msg+='Your shield blocked most of it. ';}
+  d=Math.max(1,Math.round(d));b.h=Math.max(0,b.h-d);b.hitMe=true;
+  b.turnLog.push(msg+b.cname+' loses '+d+' HP.');
+  if(b.h<=0){b.over='lose';b.turnLog.push(b.cname+' is too tired to go on.');}
+}
+function playerAct(b,id){
+  var A=ABIL.filter(function(x){return x.id===id;})[0],i=ABIL.indexOf(A),nm=ABIL_NAMES[b.type];
+  if(b.over||b.lvl<A.lv)return false;
+  if(A.cd&&b.cd[id]>0)return false;
+  if(id==='mend'&&b.mend<=0)return false;
+  b.turnLog=[];b.hitFoe=false;b.hitMe=false;
+  if(A.pow){
+    var m=elemMult(b.type,b.foe.el),d=Math.max(1,Math.round(b.atk*A.pow*m*rv()));
+    b.e=Math.max(0,b.e-d);b.hitFoe=true;if(A.cd)b.cd[id]=A.cd+1;
+    b.turnLog.push(nm[i]+' hits for '+d+'!'+(m>1?' Super effective!':m<1?' Not very effective.':''));
+  }else if(id==='guard'){b.guard=true;b.turnLog.push(nm[i]+': the next hit will be softened.');}
+  else{var hh=Math.round(b.hMax*.35);b.h=Math.min(b.hMax,b.h+hh);b.mend--;b.turnLog.push(nm[i]+' heals '+hh+' HP.');}
+  if(b.e<=0){b.over='win';b.turnLog.push(b.foe.n+' is defeated!');return true;}
+  enemyAct(b);
+  for(var k in b.cd)if(b.cd[k]>0)b.cd[k]--;
+  return true;
+}
+/* ---------- word detective and puzzle patterns (no DOM) ---------- */
+var WORDQ={spell:1,vocab:1};
+var VOCAB_TOPICS=['Opposites','Same meaning','Easy definitions','Synonyms','Word meanings','Fill the blank','Short reading','Hard words and inference'];
+var LOGIC_TOPICS=['Shape patterns','Longer shape patterns','Counting up','Counting patterns','Growing patterns','Tricky patterns','Odd one out','Logic clues and codes'];
+var TOPICS={math:MATH_TOPICS,vocab:VOCAB_TOPICS,logic:LOGIC_TOPICS};
+var SEEN=[];
+function fresh(list,keyf){
+  for(var i=0;i<25;i++){var c=pick(list),k=keyf(c);if(SEEN.indexOf(k)<0){SEEN.push(k);if(SEEN.length>10)SEEN.shift();return c;}}
+  return pick(list);
+}
+function mc(prompt,ans,opts,extra){var q={prompt:prompt,ans:ans,opts:opts,why:''};for(var k in extra)q[k]=extra[k];return q;}
+function distract(ans,pool,n){return shuffle(pool.filter(function(x){return x!==ans;})).slice(0,n||3);}
+function qt(w){return '“'+w+'”';}
+var OPP=[['hot','cold'],['big','small'],['up','down'],['fast','slow'],['happy','sad'],['day','night'],['open','closed'],['full','empty'],['hard','soft'],['early','late'],['old','new'],['loud','quiet'],['light','dark'],['wet','dry'],['clean','dirty'],['strong','weak'],['thick','thin'],['brave','scared']];
+var SYN2=[['happy','glad'],['big','large'],['little','small'],['quick','fast'],['begin','start'],['end','finish'],['sleepy','tired'],['mad','angry'],['pretty','beautiful'],['smart','clever'],['shout','yell'],['close','near'],['rock','stone'],['jump','leap']];
+var SYN4=[['brave','courageous'],['angry','furious'],['tired','exhausted'],['scared','frightened'],['clever','intelligent'],['quiet','silent'],['strange','odd'],['difficult','challenging'],['rich','wealthy'],['huge','enormous'],['fix','repair'],['choose','select'],['hide','conceal'],['want','desire']];
+var DEF3=[['enormous','very, very big'],['tiny','extremely small'],['delicious','tasting very good'],['noisy','making a lot of sound'],['gentle','soft and careful'],['ancient','very, very old'],['empty','having nothing inside'],['brave','not afraid of danger'],['sparkle','to shine with little flashes'],['hungry','wanting to eat']];
+var DEF5=[['reluctant','not wanting to do something'],['fragile','easy to break'],['generous','happy to share with others'],['curious','eager to learn or know'],['abundant','more than enough'],['cautious','careful to avoid danger'],['ordinary','normal, not special'],['vanish','to disappear suddenly'],['observe','to watch carefully'],['peculiar','strange or unusual'],['fortunate','lucky']];
+var DEF8=[['meticulous','very careful about small details'],['ambiguous','having more than one possible meaning'],['benevolent','kind and wanting to help others'],['ephemeral','lasting only a very short time'],['ubiquitous','seeming to be everywhere'],['pragmatic','practical and sensible'],['scarce','hard to find; in short supply'],['verbose','using more words than needed'],['candid','honest and direct'],['inevitable','certain to happen']];
+var CLOZE=[
+ ['The hungry fox crept ____ toward the henhouse.','silently',['noisily','cheerfully','angrily']],
+ ['After the long hike, we were too ____ to walk any farther.','exhausted',['excited','delicious','curious']],
+ ['The scientist made a ____ discovery that changed how we think about space.','remarkable',['fragile','reluctant','ordinary']],
+ ['Please be ____ with the glass vase, because it breaks easily.','careful',['careless','noisy','hungry']],
+ ['She was so ____ that she gave half of her lunch to a friend.','generous',['selfish','sleepy','tiny']],
+ ['The town was ____ after midnight, and nothing moved in the streets.','deserted',['crowded','delicious','cheerful']],
+ ['He spoke so ____ that everyone at the back of the room could hear him.','loudly',['softly','nervously','gently']],
+ ['The ____ cat sat in the sun and purred, completely relaxed.','content',['furious','frantic','hostile']]];
+var PASS7=[
+ {t:'Mia planted three sunflower seeds on Monday. By Friday, a tiny green shoot had pushed through the soil. Mia watered it every morning and moved the pot closer to the window.',q:'Where did Mia move the pot?',a:'Closer to the window',d:['Into the garden','Under her bed','Outside the door']},
+ {t:'Octopuses have three hearts. Two pump blood to the gills, and one pumps blood to the rest of the body. When an octopus swims, the heart for the body stops beating, so it prefers crawling.',q:'How many hearts does an octopus have?',a:'Three',d:['One','Two','Eight']},
+ {t:'The library was quiet except for the soft tapping of rain on the roof. Omar found a corner chair, opened his new book about volcanoes, and read until the lights blinked to tell everyone it was closing time.',q:'What told Omar the library was closing?',a:'The lights blinked',d:['A loud bell rang','The rain stopped','A librarian called his name']},
+ {t:'Honeybees communicate by dancing. A bee that finds flowers returns to the hive and waggles in a figure-eight. The angle of the dance shows the other bees which direction to fly.',q:'What does the angle of the dance show?',a:'Which direction to fly',d:['How many bees to bring','What color the flowers are','How big the hive is']},
+ {t:'Sam wanted to build a treehouse. First he drew a plan. Then he asked his uncle to help him buy wood. They spent two Saturdays hammering boards together before it was finished.',q:'What did Sam do first?',a:'He drew a plan',d:['He bought wood','He hammered boards','He asked his uncle for a ladder']}];
+var PASS8=[
+ {t:'Lena looked at the dark clouds and zipped her jacket. She grabbed her umbrella from the hook by the door, even though the morning sun was still shining.',q:'What can you tell about Lena?',a:'She thinks it will rain later',d:['She dislikes sunny days','She is going to the beach','She lost her umbrella']},
+ {t:'The old clock in the town square had not worked for years, and nobody noticed anymore. Then one morning a girl climbed the tower with a toolbox. By lunchtime, the whole town stopped to listen to it chime.',q:'Why did the whole town stop at lunchtime?',a:'The clock had been fixed',d:['The tower was falling','A parade was starting','The girl was lost']},
+ {t:'Although Theo studied every night for the spelling bee, his hands shook as he walked on stage. He took a deep breath, looked at the judge, and began to spell the first letter slowly.',q:'How did Theo most likely feel on stage?',a:'Nervous',d:['Bored','Angry','Sleepy']},
+ {t:'In winter, arctic foxes grow thick white fur. In summer, their coats turn brown or gray. This helps them hide from predators and sneak up on prey all year long.',q:'Why does the arctic fox change its coat color?',a:'To blend in with its surroundings',d:['To stay cooler in summer','To look like its friends','Because it eats different food']},
+ {t:'Maya’s grandfather never threw anything away. His garage held jars of screws, old radios, and bent bicycle wheels. When the neighbor’s lawn mower broke, he found exactly the part needed in under a minute.',q:'What does this passage suggest about Maya’s grandfather?',a:'He saves things because they might be useful',d:['He sells things at a market','He does not like his neighbor','He is bad at fixing things']}];
+function pairQ(list,kind){
+  var x=fresh(list,function(p){return p[0];});if(Math.random()<.5)x=[x[1],x[0]];
+  var pool=[];list.forEach(function(p){pool.push(p[0],p[1]);});pool=pool.filter(function(w){return w!==x[0];});
+  var line=kind==='opp'?'What is the opposite of '+qt(x[0])+'?':'Which word means the same as '+qt(x[0])+'?';
+  return mc(line,x[1],shuffle(distract(x[1],pool).concat(x[1])),{why:qt(x[0])+' and '+qt(x[1])+(kind==='opp'?' are opposites.':' mean almost the same thing.')});
+}
+function defQ(list){
+  var x=fresh(list,function(p){return p[0];}),pool=list.map(function(p){return p[1];});
+  return mc('What does '+qt(x[0])+' mean?',x[1],shuffle(distract(x[1],pool).concat(x[1])),{why:qt(x[0])+' means '+x[1]+'.'});
+}
+function passQ(list){var x=fresh(list,function(p){return p.q;});return mc(x.q,x.a,shuffle(x.d.concat(x.a)),{body:x.t,read:true});}
+function vocabQ(l){
+  if(l===1)return pairQ(OPP,'opp');
+  if(l===2)return pairQ(SYN2,'syn');
+  if(l===3)return defQ(DEF3);
+  if(l===4)return pairQ(SYN4,'syn');
+  if(l===5)return defQ(DEF5);
+  if(l===6){var c=fresh(CLOZE,function(p){return p[0];});return mc('Which word fits best?',c[1],shuffle(c[2].concat(c[1])),{body:c[0].replace('____','_____')});}
+  if(l===7)return passQ(PASS7);
+  return Math.random()<.5?defQ(DEF8):passQ(PASS8);
+}
+/* ---- puzzle patterns ---- */
+var TOK=['circle:#e5484d','square:#3ea6e8','triangle:#ffd166','star:#7ce3a1'];
+function numOpts(ans,step){
+  var c=[ans+1,ans-1,ans+2,ans-2,ans+step,ans-step,ans+2*step];
+  c=c.filter(function(x,i){return x!==ans&&x>=0&&c.indexOf(x)===i;});
+  return shuffle(shuffle(c).slice(0,3).concat(ans)).map(String);
+}
+function patQ(pat){
+  var t=shuffle(TOK),seq=[],i;for(i=0;i<5;i++)seq.push(t[pat[i%pat.length]]);
+  return {prompt:'Which one comes next?',seq:seq,shapes:true,ans:t[pat[5%pat.length]],opts:shuffle(TOK.slice()),why:'The pattern repeats.',meta:{pat:pat}};
+}
+function numQ(terms,why){
+  var ans=terms[5],d=Math.abs(terms[5]-terms[4])||1;
+  return {prompt:'What number comes next?',nums:terms.slice(0,5).join(',  ')+',  ?',ans:String(ans),opts:numOpts(ans,d),why:why,meta:{terms:terms}};
+}
+function uniq(gen,n){var a=[];while(a.length<n){var v=gen();if(a.indexOf(v)<0)a.push(v);}return a;}
+function oddQ(){
+  var t=ri(1,3),three,odd,why;
+  if(t===1){three=uniq(function(){return 2*ri(2,30);},3);odd=2*ri(1,30)+1;why='Three numbers are even. Only '+odd+' is odd.';}
+  else if(t===2){var k=pick([3,4,6,7,9]);three=uniq(function(){return k*ri(2,12);},3);do{odd=ri(6,100);}while(odd%k===0||three.indexOf(odd)>=0);why='Three numbers are in the '+k+' times table. '+odd+' is not.';}
+  else{var sq=[4,9,16,25,36,49,64,81,100,121];three=shuffle(sq).slice(0,3);do{odd=ri(5,120);}while(Math.sqrt(odd)%1===0);why='Three numbers are square numbers, like 6 × 6 = 36. '+odd+' is not.';}
+  return {prompt:'Which number does not belong?',ans:String(odd),opts:shuffle(three.concat(odd)).map(String),why:why,meta:{three:three,odd:odd,t:t}};
+}
+var NAMES=['Ava','Ben','Cy','Dee','Eli','Fay','Gus','Hana'];
+function clueQ(){
+  var i;
+  if(Math.random()<.5){
+    var n=ri(3,4),order=shuffle(NAMES).slice(0,n),facts=[];
+    for(i=0;i<n-1;i++)facts.push([order[i],order[i+1]]);
+    var ask=n===3?pick(['tallest','shortest','middle']):pick(['tallest','shortest']);
+    var ans=ask==='tallest'?order[0]:ask==='shortest'?order[n-1]:order[1];
+    var names=order.slice();NAMES.forEach(function(x){if(names.length<4&&names.indexOf(x)<0)names.push(x);});
+    return {body:shuffle(facts).map(function(f){return f[0]+' is taller than '+f[1]+'.';}).join(' '),prompt:'Who is '+(ask==='middle'?'in the middle':'the '+ask)+'?',ans:ans,opts:shuffle(names),
+      why:'From tallest to shortest: '+order.join(', ')+'.',meta:{facts:facts,ask:ask,order:order}};
+  }
+  var len=ri(3,4),w='',sum=0,parts=[];
+  for(i=0;i<len;i++){var v=ri(1,5);w+='ABCDE'.charAt(v-1);sum+=v;parts.push(v);}
+  return {prompt:'In a secret code, A=1, B=2, C=3, D=4 and E=5. What is the total for '+qt(w)+'?',ans:String(sum),opts:numOpts(sum,1),
+    why:w.split('').join(' + ')+' = '+parts.join(' + ')+' = '+sum+'.',meta:{word:w,sum:sum}};
+}
+function logicQ(l){
+  var s,d,t,i,terms;
+  if(l===1)return patQ([0,1]);
+  if(l===2)return patQ(pick([[0,1,2],[0,0,1]]));
+  if(l===3){s=ri(1,20);d=ri(2,9);terms=[];for(i=0;i<6;i++)terms.push(s+d*i);return numQ(terms,'Each number is '+d+' more than the one before.');}
+  if(l===4){
+    t=ri(1,3);terms=[];
+    if(t===1){s=ri(50,90);d=ri(3,9);for(i=0;i<6;i++)terms.push(s-d*i);return numQ(terms,'Each number is '+d+' less than the one before.');}
+    if(t===2){s=ri(1,5);for(i=0;i<6;i++)terms.push(s*Math.pow(2,i));return numQ(terms,'Each number is double the one before.');}
+    d=pick([5,10,25]);s=ri(1,30);for(i=0;i<6;i++)terms.push(s+d*i);return numQ(terms,'Each number is '+d+' more than the one before.');
+  }
+  if(l===5){
+    terms=[];
+    if(Math.random()<.5){s=ri(1,10);d=ri(1,3);var cur=s,j=d;for(i=0;i<6;i++){terms.push(cur);cur+=j;j++;}return numQ(terms,'The jumps grow by 1 each time: +'+d+', +'+(d+1)+', +'+(d+2)+'...');}
+    var k=ri(1,4);for(i=0;i<6;i++)terms.push((k+i)*(k+i));return numQ(terms,'These are square numbers: '+k+' × '+k+', '+(k+1)+' × '+(k+1)+'...');
+  }
+  if(l===6){
+    t=ri(1,3);terms=[];
+    if(t===1){s=ri(1,3);for(i=0;i<6;i++)terms.push(s*Math.pow(3,i));return numQ(terms,'Each number is 3 times the one before.');}
+    if(t===2){var a=ri(1,4),b=ri(2,6);terms=[a,b];for(i=2;i<6;i++)terms.push(terms[i-1]+terms[i-2]);return numQ(terms,'Each number is the sum of the two numbers before it.');}
+    s=ri(1,10);var p=ri(1,4),q=ri(5,9);terms=[s];for(i=1;i<6;i++)terms.push(terms[i-1]+(i%2?p:q));return numQ(terms,'The jumps take turns: +'+p+', then +'+q+'.');
+  }
+  if(l===7)return oddQ();
+  return clueQ();
+}
+/* ---------- drawings ---------- */
+function creature(type,stage,worn,size,id){
+  var T=TYPES[type],u='g'+id,w=worn||[];
+  var s='<svg viewBox="0 0 200 200" width="'+size+'" height="'+size+'" role="img" aria-label="Companion creature" style="max-width:100%">';
+  s+='<defs><radialGradient id="'+u+'"><stop offset="0" stop-color="'+T.c2+'" stop-opacity=".85"/><stop offset="1" stop-color="'+T.c2+'" stop-opacity="0"/></radialGradient></defs>';
+  if(stage===0){
+    s+='<ellipse cx="100" cy="112" rx="84" ry="88" fill="url(#'+u+')"/>';
+    s+='<path d="M100 40C142 40 162 100 162 134C162 166 134 184 100 184C66 184 38 166 38 134C38 100 58 40 100 40Z" fill="'+T.c2+'" stroke="'+T.dk+'" stroke-width="4"/>';
+    [[78,96,9],[122,124,11],[82,152,8],[124,84,7],[104,160,6]].forEach(function(c){s+='<circle cx="'+c[0]+'" cy="'+c[1]+'" r="'+c[2]+'" fill="'+T.c1+'"/>';});
+    return s+'</svg>';
+  }
+  var k=[0,.62,.8,1][stage];
+  s+='<g transform="translate(100 184) scale('+k+') translate(-100 -184)">';
+  if(stage>=3){
+    s+='<circle cx="100" cy="116" r="96" fill="url(#'+u+')"/>';
+    s+='<path d="M52 108C10 76 6 132 36 152C20 122 40 112 52 120Z" fill="'+T.c2+'" stroke="'+T.dk+'" stroke-width="3"/>';
+    s+='<path d="M148 108C190 76 194 132 164 152C180 122 160 112 148 120Z" fill="'+T.c2+'" stroke="'+T.dk+'" stroke-width="3"/>';
+  }
+  if(stage>=2){
+    s+='<path d="M146 152C188 152 186 112 170 106C178 130 162 138 144 134Z" fill="'+T.c1+'" stroke="'+T.dk+'" stroke-width="3"/>';
+    s+='<ellipse cx="48" cy="136" rx="11" ry="19" transform="rotate(20 48 136)" fill="'+T.c1+'" stroke="'+T.dk+'" stroke-width="3"/>';
+    s+='<ellipse cx="152" cy="136" rx="11" ry="19" transform="rotate(-20 152 136)" fill="'+T.c1+'" stroke="'+T.dk+'" stroke-width="3"/>';
+  }
+  s+='<ellipse cx="78" cy="174" rx="18" ry="9" fill="'+T.dk+'"/><ellipse cx="122" cy="174" rx="18" ry="9" fill="'+T.dk+'"/>';
+  s+='<ellipse cx="100" cy="124" rx="54" ry="50" fill="'+T.c1+'" stroke="'+T.dk+'" stroke-width="4"/>';
+  s+='<ellipse cx="100" cy="140" rx="34" ry="28" fill="'+T.c2+'"/>';
+  if(type==='ember'){
+    s+='<path d="M100 78C78 56 98 44 94 22C120 40 124 62 100 78Z" fill="#ff7a3d"/><path d="M100 78C92 64 102 56 100 46C112 56 110 68 100 78Z" fill="#ffd166"/>';
+  }else if(type==='tide'){
+    s+='<path d="M64 92C40 70 52 50 70 48C62 64 66 78 76 86Z" fill="'+T.c2+'" stroke="'+T.dk+'" stroke-width="3"/><path d="M136 92C160 70 148 50 130 48C138 64 134 78 124 86Z" fill="'+T.c2+'" stroke="'+T.dk+'" stroke-width="3"/>';
+  }else if(type==='stone'){
+    [[82,86,90,52,100,86],[96,80,106,40,118,80],[112,86,122,60,132,92]].forEach(function(p){s+='<polygon points="'+p[0]+','+p[1]+' '+p[2]+','+p[3]+' '+p[4]+','+p[5]+'" fill="'+T.c2+'" stroke="'+T.dk+'" stroke-width="3"/>';});
+  }else{
+    s+='<ellipse cx="58" cy="94" rx="14" ry="27" transform="rotate(-25 58 94)" fill="'+T.c2+'" stroke="'+T.dk+'" stroke-width="3"/><ellipse cx="142" cy="94" rx="14" ry="27" transform="rotate(25 142 94)" fill="'+T.c2+'" stroke="'+T.dk+'" stroke-width="3"/>';
+    s+='<path d="M100 76C92 64 104 56 100 48" stroke="'+T.dk+'" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  }
+  s+='<circle cx="80" cy="114" r="13" fill="#fff"/><circle cx="120" cy="114" r="13" fill="#fff"/>';
+  s+='<circle cx="82" cy="116" r="7" fill="#1b1b2f"/><circle cx="122" cy="116" r="7" fill="#1b1b2f"/><circle cx="85" cy="112" r="2.6" fill="#fff"/><circle cx="125" cy="112" r="2.6" fill="#fff"/>';
+  s+='<ellipse cx="64" cy="134" rx="9" ry="6" fill="#ff9eb5" opacity=".6"/><ellipse cx="136" cy="134" rx="9" ry="6" fill="#ff9eb5" opacity=".6"/>';
+  s+='<path d="M90 134Q100 145 110 134" stroke="#1b1b2f" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  if(w.indexOf('scarf')>=0)s+='<path d="M58 154Q100 172 142 154L140 170Q100 186 60 170Z" fill="#e5484d" stroke="#8c1d22" stroke-width="3"/>';
+  if(w.indexOf('glasses')>=0)s+='<circle cx="80" cy="114" r="17" fill="rgba(255,255,255,.18)" stroke="#1b1b2f" stroke-width="4"/><circle cx="120" cy="114" r="17" fill="rgba(255,255,255,.18)" stroke="#1b1b2f" stroke-width="4"/><path d="M97 114H103" stroke="#1b1b2f" stroke-width="4"/>';
+  if(w.indexOf('crown')>=0)s+='<polygon points="76,78 80,52 92,66 100,46 108,66 120,52 124,78" fill="#ffd166" stroke="#b8860b" stroke-width="3"/>';
+  return s+'</g></svg>';
+}
+function scene(r){
+  var s='<svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true">';
+  if(r===0){
+    s+='<path d="M0 120Q50 90 100 120T200 120T300 120T400 120V200H0Z" fill="#2a8fc0" opacity=".55"/><path d="M0 150Q50 124 100 150T200 150T300 150T400 150V200H0Z" fill="#14659b" opacity=".75"/><path d="M0 178Q50 158 100 178T200 178T300 178T400 178V200H0Z" fill="#0a4673"/>';
+    s+='<circle cx="60" cy="100" r="5" fill="#fff" opacity=".5"/><circle cx="300" cy="90" r="7" fill="#fff" opacity=".4"/><circle cx="340" cy="120" r="4" fill="#fff" opacity=".5"/>';
+  }else if(r===1){
+    s+='<rect y="170" width="400" height="30" fill="#4a3220"/>';
+    [[40,170,60,90,80,170,'#e3c88d'],[90,170,115,60,140,170,'#c99a55'],[260,170,285,80,310,170,'#e3c88d'],[320,170,345,100,368,170,'#c99a55'],[170,170,190,110,210,170,'#a8793f']].forEach(function(p){s+='<polygon points="'+p[0]+','+p[1]+' '+p[2]+','+p[3]+' '+p[4]+','+p[5]+'" fill="'+p[6]+'" stroke="#4a3220" stroke-width="3"/>';});
+  }else if(r===2){
+    s+='<polygon points="40,200 150,70 190,70 320,200" fill="#3a1c1a"/><path d="M150 70L170 92L190 70Z" fill="#ff8a3d"/><path d="M165 90Q160 130 150 200H175Q170 130 172 92Z" fill="#ff8a3d" opacity=".8"/>';
+    s+='<circle cx="120" cy="50" r="4" fill="#ffd166"/><circle cx="230" cy="40" r="3" fill="#ffd166"/><circle cx="330" cy="70" r="4" fill="#ffb35c"/><polygon points="300,200 340,120 400,200" fill="#2c1313"/>';
+  }else{
+    [[80,120,70,16],[300,90,60,14],[200,160,90,18]].forEach(function(c){s+='<ellipse cx="'+c[0]+'" cy="'+c[1]+'" rx="'+c[2]+'" ry="'+c[3]+'" fill="#fff" opacity=".8"/><ellipse cx="'+(c[0]+c[2]*.4)+'" cy="'+(c[1]-c[3]*.8)+'" rx="'+(c[2]*.5)+'" ry="'+c[3]+'" fill="#fff" opacity=".8"/>';});
+    s+='<path d="M310 150h70l-14 24h-42z" fill="#7a5c3a"/><path d="M310 150h70q-35-26-70 0z" fill="#5fae6b"/>';
+  }
+  return s+'</svg>';
+}
+function clockSVG(h,m){
+  var s='<svg viewBox="0 0 200 200" class="clock" role="img" aria-label="Analog clock"><circle cx="100" cy="100" r="92" fill="#fffdf5" stroke="#14213d" stroke-width="6"/>';
+  for(var i=1;i<=12;i++){var a=i*Math.PI/6;s+='<text x="'+(100+72*Math.sin(a)).toFixed(1)+'" y="'+(107-72*Math.cos(a)).toFixed(1)+'" text-anchor="middle" font-size="20" font-weight="800" fill="#14213d" font-family="Baloo 2,sans-serif">'+i+'</text>';}
+  var ma=m*6*Math.PI/180,ha=((h%12)*30+m*.5)*Math.PI/180;
+  s+='<line x1="100" y1="100" x2="'+(100+44*Math.sin(ha)).toFixed(1)+'" y2="'+(100-44*Math.cos(ha)).toFixed(1)+'" stroke="#14213d" stroke-width="9" stroke-linecap="round"/>';
+  s+='<line x1="100" y1="100" x2="'+(100+66*Math.sin(ma)).toFixed(1)+'" y2="'+(100-66*Math.cos(ma)).toFixed(1)+'" stroke="#d9480f" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="100" r="6" fill="#14213d"/></svg>';
+  return s;
+}
+var GEM='<svg class="ic" viewBox="0 0 20 20" aria-hidden="true"><polygon points="10,2 18,8 10,18 2,8" fill="#7fe3ff" stroke="#fff" stroke-width="1.5"/></svg>';
+function star(on){return '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 15,9 22,9.5 17,14.5 18.5,22 12,18 5.5,22 7,14.5 2,9.5 9,9" fill="'+(on?'#ffd166':'rgba(255,255,255,.25)')+'" stroke="#fff" stroke-width="1"/></svg>';}
+function monster(el,tier,size){
+  var C={ember:['#d9541e','#6e1f08','#ffb35c'],tide:['#2d7fb8','#0e3a63','#9fe6ff'],stone:['#8a7a62','#40352a','#d9c9a8'],gust:['#8e86d8','#3f3985','#e4dfff']}[el];
+  var s='<svg viewBox="0 0 200 200" width="'+size+'" height="'+size+'" role="img" aria-label="Enemy creature" style="max-width:100%">';
+  var n=3+Math.min(5,Math.floor(tier/2)),i,x;
+  for(i=0;i<n;i++){x=58+84*i/(n-1);s+='<polygon points="'+(x-10)+',84 '+x+','+(54-(i%2)*10-(tier>=9?10:0))+' '+(x+10)+',84" fill="'+C[2]+'" stroke="'+C[1]+'" stroke-width="3"/>';}
+  s+='<ellipse cx="70" cy="178" rx="20" ry="9" fill="'+C[1]+'"/><ellipse cx="130" cy="178" rx="20" ry="9" fill="'+C[1]+'"/>';
+  s+='<path d="M36 152C26 100 58 72 100 72C142 72 174 100 164 152C154 182 46 182 36 152Z" fill="'+C[0]+'" stroke="'+C[1]+'" stroke-width="4"/>';
+  s+='<circle cx="62" cy="150" r="7" fill="'+C[2]+'" opacity=".6"/><circle cx="138" cy="146" r="9" fill="'+C[2]+'" opacity=".6"/><circle cx="104" cy="92" r="5" fill="'+C[2]+'" opacity=".6"/>';
+  s+='<ellipse cx="76" cy="118" rx="13" ry="11" fill="#fff"/><ellipse cx="124" cy="118" rx="13" ry="11" fill="#fff"/><circle cx="79" cy="120" r="6" fill="#1b1b2f"/><circle cx="121" cy="120" r="6" fill="#1b1b2f"/>';
+  s+='<path d="M58 100L92 112" stroke="'+C[1]+'" stroke-width="7" stroke-linecap="round"/><path d="M142 100L108 112" stroke="'+C[1]+'" stroke-width="7" stroke-linecap="round"/>';
+  s+='<path d="M74 148L86 138L98 150L110 138L122 150L128 142" stroke="'+C[1]+'" stroke-width="5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>';
+  return s+'</svg>';
+}
+/* ---------- app state and screens ---------- */
+var store={profiles:[]};
+var S={screen:'picker',p:null,temp:false,round:null,confirmDel:false,form:{name:'',cname:'',type:'ember',band:1}};
+var SPEECH=('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window);
+var QUESTS=[{k:'math',n:'Number Quest',d:'Sums, times and more',u:1},{k:'spell',n:'Spelling Quest',d:'Listen, then spell it',u:1},{k:'miss',n:'Missing Number',d:'Find the hidden number',u:3},{k:'clock',n:'Clock Quest',d:'What time is it?',u:5},{k:'vocab',n:'Word Detective',d:'Meanings, opposites and reading',u:2},{k:'logic',n:'Puzzle Patterns',d:'Patterns and clever puzzles',u:4}];
+function load(){try{var j=localStorage.getItem(KEY);if(j){var o=JSON.parse(j);if(o&&o.profiles)store=o;}}catch(e){}}
+function save(){if(S.temp)return;try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function view(h,realm){var a=document.getElementById('app');a.setAttribute('data-realm',realm);a.innerHTML='<div class="scene">'+scene(realm)+'</div><div class="wrap">'+h+'</div>';}
+function syncInputs(){
+  var a=document.getElementById('ans');if(a&&S.round)S.round.cur=a.value;
+  var n=document.getElementById('f-name'),c=document.getElementById('f-cname');
+  if(n)S.form.name=n.value;if(c)S.form.cname=c.value;
+}
+function render(){
+  syncInputs();
+  if(S.screen==='picker')rPicker();else if(S.screen==='new')rNew();else if(S.screen==='home')rHome();
+  else if(S.screen==='play')rPlay();else if(S.screen==='results')rResults();else if(S.screen==='coll')rColl();else if(S.screen==='arena')rArena();else if(S.screen==='battle')rBattle();
+}
+function rPicker(){
+  var h='<h1>Hatchling Realms</h1><p class="sub">Who is exploring today?</p><div class="grid">';
+  store.profiles.forEach(function(p,i){
+    h+='<button class="card pick" data-act="open" data-v="'+i+'">'+creature(p.type,stageOf(eff(p)),p.worn,120,'p'+i)+'<b>'+esc(p.name)+'</b><span>'+titleOf(eff(p))+' · Level '+levelOf(eff(p))+'</span></button>';
+  });
+  if(store.profiles.length<4)h+='<button class="card pick" data-act="new"><span class="plus">+</span><b>New explorer</b></button>';
+  h+='</div><div class="row"><button class="btn ghost" data-act="try">Try it out (nothing is saved)</button></div>';
+  view(h,0);
+}
+function rNew(){
+  var f=S.form;
+  var h='<div><button class="btn ghost sm" data-act="picker">‹ Back</button></div><h1 class="title sm">New explorer</h1><div class="card form">';
+  h+='<label for="f-name">Explorer name</label><input id="f-name" maxlength="14" value="'+esc(f.name)+'" autocomplete="off">';
+  h+='<label>Age</label><div class="chips">'+[[1,'6–7'],[2,'8–9'],[3,'10+'],[4,'10+ advanced math']].map(function(b){return '<button class="chip'+(f.band===b[0]?' on':'')+'" data-act="fage" data-v="'+b[0]+'">'+b[1]+'</button>';}).join('')+'</div>';
+  h+='<label>Choose an egg</label><div class="chips">'+Object.keys(TYPES).map(function(k){return '<button class="chip egg'+(f.type===k?' on':'')+'" data-act="ftype" data-v="'+k+'">'+creature(k,0,[],70,'e'+k)+'<span>'+TYPES[k].name+'</span></button>';}).join('')+'</div>';
+  h+='<label for="f-cname">Name your companion</label><input id="f-cname" maxlength="14" value="'+esc(f.cname)+'" autocomplete="off">';
+  h+='<button class="btn" data-act="create">Start the adventure</button></div>';
+  view(h,0);
+}
+function rHome(){
+  var p=S.p,L=levelOf(eff(p)),st=stageOf(eff(p)),rm=realmOf(eff(p));
+  var lo=xpFor(L),hi=xpFor(L+1),e=eff(p),gi=gateInfo(p),pct=Math.min(100,Math.round((e-lo)/(hi-lo)*100));
+  var line=st===0?'Answer questions to warm up my egg!':pick(['Ready for a quest?','Let’s explore '+REALMS[rm].n+'!','I feel stronger already.','What shall we learn today?']);
+  var h='<div class="top"><div><div class="who">'+esc(p.name)+'</div><div class="sub">'+titleOf(eff(p))+' · Level '+L+' · '+REALMS[rm].n+'</div></div><div class="stats"><span class="pill">'+GEM+p.gems+'</span><span class="pill">Day streak '+p.days+'</span></div></div>';
+  if(S.temp)h+='<div class="card test"><b>Test mode.</b> Nothing here is saved.<div class="row" style="margin-top:8px;justify-content:flex-start"><button class="btn ghost sm" data-act="cheat" data-v="xp100">+100 XP</button><button class="btn ghost sm" data-act="cheat" data-v="xp500">+500 XP</button><button class="btn ghost sm" data-act="cheat" data-v="skill">Harder questions</button><button class="btn ghost sm" data-act="cheat" data-v="math4">Math +4</button><button class="btn ghost sm" data-act="cheat" data-v="balance">Balance subjects</button><button class="btn ghost sm" data-act="cheat" data-v="gems">+10 gems</button></div></div>';
+  h+='<div class="hero"><div class="pet">'+creature(p.type,st,p.worn,230,'home')+'</div><div class="bubble">'+esc(p.cname)+': '+line+'</div></div>';
+  h+='<div class="card"><div class="bar"><i style="width:'+pct+'%"></i></div><div class="xpline"><span>Level '+L+'</span><span>'+(gi.open?(hi-e)+' XP to Level '+(L+1):'Realm Gate')+'</span></div></div>';
+  if(!gi.open){var parts=[];if(gi.needN>0)parts.push('Number power ('+gi.needN+' more XP from Number, Missing Number, Clock or Puzzle quests)');if(gi.needW>0)parts.push('Word power ('+gi.needW+' more XP from Spelling or Word Detective quests)');h+='<div class="card gate"><b>Realm Gate!</b> '+esc(p.cname)+' is ready to grow, but needs more '+parts.join(' and ')+'.</div>';}
+  h+='<div class="quests">'+QUESTS.map(function(q){
+    var open=L>=q.u,sk=p.skills[q.k];
+    return '<button class="card quest" data-act="quest" data-v="'+q.k+'"'+(open?'':' disabled')+'><b>'+q.n+'</b><span>'+(open?q.d+' · Challenge '+sk.lvl+(TOPICS[q.k]?': '+TOPICS[q.k][sk.lvl-1]:''):'Unlocks at Level '+q.u)+'</span></button>';
+  }).join('')+'<button class="card quest" data-act="arena"'+(L>=3?'':' disabled')+'><b>Battle Arena</b><span>'+(L>=3?'Test '+esc(p.cname)+'\u2019s power':'Unlocks at Level 3')+'</span></button></div>';
+  h+='<div class="row"><button class="btn ghost" data-act="coll">Collection</button><button class="btn ghost" data-act="picker">Switch explorer</button></div>';
+  view(h,rm);
+}
+/* ---------- play, results, collection ---------- */
+function say(t){
+  try{if(!SPEECH)return false;speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.rate=.8;
+    var v=speechSynthesis.getVoices().filter(function(v){return /^en[-_]US/i.test(v.lang);})[0];if(v)u.voice=v;
+    speechSynthesis.speak(u);return true;}catch(e){return false;}
+}
+function startRound(q){
+  S.round={quest:q,n:0,total:6,correct:0,streak:0,xp:0,gems:0,events:[],fbEvents:[],cur:'',fb:null,hint:false,peek:false,placed:[],anim:''};
+  S.screen='play';goNext();
+}
+function goNext(){
+  var r=S.round,p=S.p;
+  r.fb=null;r.cur='';r.hint=false;r.peek=false;r.placed=[];r.anim='';r.fbEvents=[];
+  if(r.n>=r.total){finishRound();return;}
+  if(r.quest==='math')r.q=mathQ(p.skills.math.lvl);
+  else if(r.quest==='miss')r.q=missingQ(p.skills.miss.lvl);
+  else if(r.quest==='clock')r.q=clockQ(p.skills.clock.lvl);
+  else if(r.quest==='vocab')r.q=vocabQ(p.skills.vocab.lvl);
+  else if(r.quest==='logic')r.q=logicQ(p.skills.logic.lvl);
+  else{r.word=wordQ(p);r.tiles=shuffle(r.word.split(''));if(r.tiles.join('')===r.word&&r.word.length>1)r.tiles.reverse();}
+  render();
+  if(r.quest==='spell'){speakWord();var a=document.getElementById('ans');if(a)a.focus();}
+}
+function speakWord(){if(!say(S.round.word))showPeek(true);}
+function showPeek(free){
+  var r=S.round;if(!free)r.peeked=true;r.peek=true;render();
+  setTimeout(function(){if(S.round===r&&r.peek){r.peek=false;render();}},2600);
+}
+function answer(ok){
+  var r=S.round,p=S.p,sk=p.skills[r.quest],hinted=r.hint||r.peeked;
+  var L0=levelOf(eff(p)),S0=stageOf(eff(p)),R0=realmOf(eff(p)),ev=[];
+  r.n++;p.total++;r.peeked=false;
+  var gain=0;
+  if(ok){r.streak++;r.correct++;if(r.streak>p.best)p.best=r.streak;gain=hinted?5:10+Math.min(r.streak-1,5)*2;if(r.streak>=3&&!hinted){p.gems++;r.gems++;}}
+  else{r.streak=0;if(r.quest==='spell'&&!p.missed.some(function(m){return m.w===r.word;}))p.missed.push({w:r.word,due:p.total+3});}
+  var G0=gateInfo(p).open;p.xp+=gain;r.xp+=gain;p.grp[WORDQ[r.quest]?'w':'n']+=gain;
+  if(G0&&!gateInfo(p).open)ev.push('Realm Gate! '+p.cname+' needs both Number power and Word power to grow further.');
+  var mv=record(sk,ok,MAXL[r.quest]);
+  if(mv==='up')ev.push('Challenge level up! Tougher questions are coming.');
+  var L1=levelOf(eff(p)),S1=stageOf(eff(p));
+  if(S0===0&&S1>=1)ev.push('Your egg hatched! Say hello to '+p.cname+'!');
+  else if(S1>S0)ev.push(p.cname+' evolved!');
+  if(L1>L0){ev.push('Level up! You are now a '+titleOf(eff(p))+' (Level '+L1+').');QUESTS.forEach(function(q){if(q.u>L0&&q.u<=L1)ev.push('New quest unlocked: '+q.n+'!');});if(L0<3&&L1>=3)ev.push('The Battle Arena is open!');ABIL.forEach(function(a,i){if(a.lv>L0&&a.lv<=L1)ev.push('New ability: '+ABIL_NAMES[p.type][i]+'!');});}
+  if(realmOf(eff(p))>R0)ev.push('New realm: '+REALMS[realmOf(eff(p))].n+'!');
+  BADGES.forEach(function(b){if(p.badges.indexOf(b.id)<0&&b.t(p)){p.badges.push(b.id);ev.push('Badge earned: '+b.n);}});
+  r.fbEvents=ev;r.events=r.events.concat(ev);r.anim=ok?'cheer':'wobble';
+  var typed=document.getElementById('ans');
+  r.fb={ok:ok,gain:gain,typed:typed?typed.value:(r.placed.length?r.cur:'')};
+  save();render();
+  if(ok&&(ev.length||r.streak>=3))confetti(ev.length?40:18);
+}
+function finishRound(){
+  var r=S.round,p=S.p;
+  if(r.correct===r.total){p.gems+=2;r.gems+=2;r.events.push('Perfect round! Bonus gems.');}
+  var today=new Date().toLocaleDateString('en-CA');p.last=today;
+  save();S.screen='results';render();confetti(r.correct>=4?30:0);
+}
+function confetti(n){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var c=['#ffd166','#7fe3ff','#ff8a3d','#a99bf0','#7ce3a1'];
+  for(var i=0;i<n;i++){var e=document.createElement('i');e.className='cf';e.style.left=Math.random()*100+'vw';e.style.background=c[i%5];e.style.animationDelay=Math.random()*.4+'s';document.body.appendChild(e);setTimeout(function(x){x.remove();}.bind(null,e),2200);}
+}
+function clockHtml(r){return '<div>'+clockSVG(r.q.h,r.q.m)+'</div>';}
+function rPlay(){
+  var r=S.round,p=S.p,q=r.quest,sk=p.skills[q],dots='';
+  for(var i=0;i<r.total;i++)dots+='<i class="d'+(i<r.n?' on':i===r.n?' cur':'')+'"></i>';
+  var h='<div class="top"><button class="btn ghost sm" data-act="home">‹ Home</button><div class="dots">'+dots+'</div><span class="pill">Challenge '+sk.lvl+(TOPICS[q]?' · '+TOPICS[q][sk.lvl-1]:'')+'</span></div>';
+  h+='<div class="stage"><div class="'+r.anim+'">'+creature(p.type,stageOf(eff(p)),p.worn,140,'play')+'</div><div class="card qcard">';
+  if(q==='math'||q==='miss'){
+    h+='<div class="q">'+esc(r.q.text)+'</div>'+(r.q.note?'<div class="sub" style="color:#fff">'+esc(r.q.note)+'</div>':'')+'<div class="ansbox" id="ansbox">'+(r.cur||'&nbsp;')+'</div>';
+    if(!r.fb)h+='<div class="pad">'+[1,2,3,4,5,6,7,8,9].map(function(n){return '<button class="btn" data-act="key" data-v="'+n+'">'+n+'</button>';}).join('')+'<button class="btn ghost" data-act="key" data-v="back" aria-label="Delete">⌫</button><button class="btn" data-act="key" data-v="0">0</button><button class="btn" data-act="submit">Go</button>'+(q==='math'&&sk.lvl>=13?'<button class="btn ghost" data-act="key" data-v="-" aria-label="Minus sign">−</button><button class="btn ghost" data-act="key" data-v=".">.</button><button class="btn ghost" data-act="key" data-v="/">/</button>':'')+'</div>';
+  }else if(q==='vocab'||q==='logic'){h+=mcHtml(r);}else if(q==='clock'){
+    h+=clockHtml(r)+'<div class="sub" style="color:#fff">What time does the clock show?</div>';
+    if(!r.fb)h+='<div class="opts">'+r.q.opts.map(function(o){return '<button class="btn" data-act="opt" data-v="'+o+'">'+o+'</button>';}).join('')+'</div>';
+  }else{
+    var w=r.word,mode=p.pref.spell;
+    h+='<div class="row"><button class="btn" data-act="say">Hear the word</button><button class="btn ghost sm" data-act="peek">Peek</button><button class="btn ghost sm" data-act="hint">Hint</button></div>';
+    var bl=w.split('').map(function(c,i){return (r.peek||r.fb)?c:(i===0&&r.hint?c:'_');}).join(' ');
+    h+='<div class="blanks" aria-live="polite">'+bl+'</div>';
+    if(!r.fb){
+      h+='<div class="chips"><button class="chip'+(mode==='type'?' on':'')+'" data-act="mode" data-v="type">Type</button><button class="chip'+(mode==='tiles'?' on':'')+'" data-act="mode" data-v="tiles">Letter tiles</button></div>';
+      if(mode==='type')h+='<input id="ans" value="'+esc(r.cur)+'" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Type the word"><button class="btn" data-act="submit">Check</button>';
+      else{
+        h+='<div class="slots">'+w.split('').map(function(c,i){var t=r.placed[i];return '<div class="slot">'+(t!==undefined?'<button class="tile" data-act="untile" data-v="'+i+'">'+r.tiles[t]+'</button>':'')+'</div>';}).join('')+'</div>';
+        h+='<div class="slots">'+r.tiles.map(function(c,i){return '<button class="tile'+(r.placed.indexOf(i)>=0?' gone':'')+'" data-act="tile" data-v="'+i+'">'+c+'</button>';}).join('')+'</div>';
+        h+='<button class="btn"'+(r.placed.length===w.length?'':' disabled')+' data-act="submit">Check</button>';
+      }
+    }
+  }
+  if(r.fb){
+    var f=r.fb,msg;
+    if(f.ok)msg='Yes! +'+f.gain+' XP';
+    else if(q==='spell'){var t=f.typed.toLowerCase(),sh=r.word.split('').map(function(c,i){return t[i]===c?c:'<span class="bad">'+c+'</span>';}).join('');msg='Nearly! The word is<span class="big">'+sh+'</span>We will practise it again soon.';}
+    else if(q==='vocab'||q==='logic')msg=mcWrong(r);
+    else if(q==='clock')msg='Not quite. It was <b>'+r.q.ans+'</b>.';
+    else msg='Not quite. The answer is <b>'+(r.q.disp!==undefined?r.q.disp:r.q.ans)+'</b>.';
+    h+='<div class="fb '+(f.ok?'good':'oops')+'">'+msg+'</div>';
+    r.fbEvents.forEach(function(e){h+='<div class="fb good">'+esc(e)+'</div>';});
+    h+='<button class="btn" data-act="next">'+(r.n>=r.total?'See results':'Next')+'</button>';
+  }
+  h+='</div></div>';
+  view(h,realmOf(eff(p)));
+}
+function rResults(){
+  var r=S.round,p=S.p,st='';
+  for(var i=0;i<r.total;i++)st+=star(i<r.correct);
+  var h='<h1 class="title sm">Round complete!</h1><div class="card hero"><div class="stars">'+st+'</div><div class="who">'+r.correct+' of '+r.total+' right</div><div class="pill">+'+r.xp+' XP</div>'+(r.gems?'<div class="pill">'+GEM+'+'+r.gems+' gems</div>':'')+'<div class="pet">'+creature(p.type,stageOf(eff(p)),p.worn,150,'res')+'</div></div>';
+  if(r.events.length)h+='<ul class="list">'+r.events.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul>';
+  h+='<div class="row"><button class="btn" data-act="quest" data-v="'+r.quest+'">Play again</button><button class="btn ghost" data-act="home">Home</button></div>';
+  view(h,realmOf(eff(p)));
+}
+function rColl(){
+  var p=S.p;
+  var h='<div class="top"><button class="btn ghost sm" data-act="home">‹ Home</button><span class="pill">'+GEM+p.gems+'</span></div><h1 class="title sm">'+esc(p.cname)+'’s collection</h1>';
+  h+='<div class="hero"><div class="pet">'+creature(p.type,stageOf(eff(p)),p.worn,190,'coll')+'</div></div><div class="card"><b>Accessories</b>';
+  Object.keys(ACC).forEach(function(k){
+    var a=ACC[k],own=p.owned.indexOf(k)>=0,on=p.worn.indexOf(k)>=0;
+    h+='<div class="shop"><span>'+a.n+'</span>'+(own?'<button class="btn sm '+(on?'ghost':'')+'" data-act="wear" data-v="'+k+'">'+(on?'Take off':'Wear')+'</button>':'<button class="btn sm"'+(p.gems>=a.cost?'':' disabled')+' data-act="buy" data-v="'+k+'">'+GEM+' '+a.cost+' Buy</button>')+'</div>';
+  });
+  h+='</div><div class="card"><b>Badges</b><div class="badges" style="margin-top:10px">'+BADGES.map(function(b){var on=p.badges.indexOf(b.id)>=0;return '<div class="badge'+(on?'':' off')+'"><b>'+b.n+'</b><span>'+b.d+'</span></div>';}).join('')+'</div></div>';
+  h+=S.temp?'':(S.confirmDel?'<div class="card"><b>Delete '+esc(p.name)+' and all progress?</b><div class="row" style="margin-top:10px"><button class="btn ghost" data-act="delyes">Yes, delete</button><button class="btn" data-act="delno">Keep</button></div></div>':'<div class="row"><button class="btn ghost sm" data-act="del">Delete this explorer…</button></div>');
+  view(h,realmOf(eff(p)));
+}
+/* ---------- battle arena screens ---------- */
+function dangerOf(p,f){
+  var d=f.lv-levelOf(eff(p));
+  return d<=-2?['easy','Easy win']:d<=0?['even','Fair fight']:d<=2?['hard','Tough']:['no','Too strong for now'];
+}
+function rArena(){
+  var p=S.p,L=levelOf(eff(p)),n=ABIL_NAMES[p.type];
+  var h='<div class="top"><button class="btn ghost sm" data-act="home">‹ Home</button><span class="pill">'+GEM+p.gems+'</span></div>';
+  h+='<h1 class="title sm">Battle Arena</h1><p class="sub">'+esc(p.cname)+'’s strength comes from its level. Keep learning to grow stronger.</p>';
+  h+='<div class="card"><b>'+esc(p.cname)+'’s abilities</b><ul class="list" style="margin-top:8px">'+ABIL.map(function(a,i){
+    return '<li'+(L>=a.lv?'':' style="opacity:.55"')+'>'+n[i]+' · '+a.desc+(L>=a.lv?'':' (Level '+a.lv+')')+'</li>';}).join('')+'</ul>';
+  h+='<p class="sub" style="text-align:left">Elements: Tide beats Ember, Ember beats Gust, Gust beats Stone, Stone beats Tide. You are '+TYPES[p.type].name+'.</p></div>';
+  h+='<div class="foes">'+FOES.map(function(f){
+    var d=dangerOf(p,f),done=p.beaten.indexOf(f.id)>=0;
+    return '<button class="card foe" data-act="foe" data-v="'+f.id+'">'+monster(f.el,f.t,110)+'<b>'+f.n+'</b><small>'+TYPES[f.el].name+' type · Level '+f.lv+'</small><span class="tag '+d[0]+'">'+d[1]+'</span>'+(done?'<span class="tag">Defeated</span>':'')+'</button>';
+  }).join('')+'</div>';
+  view(h,realmOf(eff(p)));
+}
+function finishBattle(){
+  var b=S.B,p=S.p;if(b.done)return;b.done=true;b.newBadges=[];
+  if(b.over==='win'){
+    p.wins++;var first=p.beaten.indexOf(b.foe.id)<0,g=first?4+b.foe.t*2:1;
+    p.gems+=g;if(first)p.beaten.push(b.foe.id);b.reward={g:g,first:first};
+    BADGES.forEach(function(x){if(p.badges.indexOf(x.id)<0&&x.t(p)){p.badges.push(x.id);b.newBadges.push(x.n);}});
+  }else p.losses++;
+  save();
+}
+function pct(a,b){return Math.max(0,Math.round(a/b*100));}
+function rBattle(){
+  var b=S.B,p=S.p,f=b.foe,L=levelOf(eff(p)),h='';
+  h+='<div class="top"><button class="btn ghost sm" data-act="arena">‹ Leave</button><span class="pill">Turn '+(b.turn+1)+'</span></div><div class="arena">';
+  h+='<div class="side"><div class="'+(b.hitFoe?'shake':'')+'">'+monster(f.el,f.t,150)+'</div><b>'+f.n+' · Level '+f.lv+'</b><div class="hp foehp"><i style="width:'+pct(b.e,b.eMax)+'%"></i></div><small>'+b.e+' / '+b.eMax+' HP</small></div>';
+  if(!b.over){
+    if(b.charge)h+='<div class="warn">'+f.n+' is charging a SLAM! '+(L>=5?'Use '+ABIL_NAMES[p.type][1]+' to block it!':'Brace yourself!')+'</div>';
+    else if(b.sinceCharge>=2)h+='<div class="warn">'+f.n+' is about to gather power...</div>';
+  }
+  h+='<div class="side"><div class="'+(b.hitMe?'shake':'')+'">'+creature(p.type,stageOf(eff(p)),p.worn,140,'bat')+'</div><b>'+esc(p.cname)+' · Level '+b.lvl+'</b><div class="hp"><i style="width:'+pct(b.h,b.hMax)+'%"></i></div><small>'+b.h+' / '+b.hMax+' HP'+(b.guard?' · Shield up':'')+'</small></div></div>';
+  if(b.turnLog.length)h+='<div class="card" aria-live="polite">'+b.turnLog.map(function(t){return '<div>'+esc(t)+'</div>';}).join('')+'</div>';
+  if(!b.over){
+    var n=ABIL_NAMES[p.type];
+    h+='<div class="abils">'+ABIL.filter(function(a){return b.lvl>=a.lv;}).map(function(a){
+      var i=ABIL.indexOf(a),dis=(a.cd&&b.cd[a.id]>0)||(a.id==='mend'&&b.mend<=0);
+      var sub=a.cd&&b.cd[a.id]>0?'Ready in '+b.cd[a.id]+' turn'+(b.cd[a.id]>1?'s':''):a.id==='mend'?b.mend+' left':a.desc;
+      return '<button class="btn abil" data-act="abil" data-v="'+a.id+'"'+(dis?' disabled':'')+'>'+n[i]+'<small>'+sub+'</small></button>';
+    }).join('')+'</div>';
+    if(ABIL.some(function(a){return b.lvl<a.lv;}))h+='<p class="sub">More abilities unlock as you level up.</p>';
+  }else if(b.over==='win'){
+    h+='<div class="card hero"><div class="who">Victory!</div><div class="pill">'+GEM+'+'+b.reward.g+' gems'+(b.reward.first?' · first win':'')+'</div>'+(b.newBadges.length?'<div class="fb good">Badge earned: '+esc(b.newBadges.join(', '))+'</div>':'')+'<div class="row"><button class="btn" data-act="arena">Back to the Arena</button><button class="btn ghost" data-act="home">Home</button></div></div>';
+  }else{
+    h+='<div class="card hero"><div class="who">Not this time</div><p class="sub" style="text-align:center">'+f.n+' is Level '+f.lv+' and '+esc(p.cname)+' is Level '+b.lvl+'. '+(f.lv>b.lvl?'Complete some quests to level up, then try again!':'Try using Guard when it charges, and pick an element it is weak against.')+'</p><div class="row"><button class="btn" data-act="home">Train with quests</button><button class="btn ghost" data-act="arena">Arena</button></div></div>';
+  }
+  view(h,realmOf(eff(p)));
+}
+/* ---------- tap-to-answer questions (vocab and puzzles) ---------- */
+function shapeSvg(tok,size){
+  var p=tok.split(':'),k=p[0],c=p[1];
+  var f='fill="'+c+'" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"';
+  var s='<svg viewBox="0 0 40 40" width="'+size+'" height="'+size+'" role="img" aria-label="'+k+'">';
+  if(k==='circle')s+='<circle cx="20" cy="20" r="15" '+f+'/>';
+  else if(k==='square')s+='<rect x="6" y="6" width="28" height="28" rx="4" '+f+'/>';
+  else if(k==='triangle')s+='<polygon points="20,5 36,34 4,34" '+f+'/>';
+  else s+='<polygon points="20,3 25,15 38,16 28,25 31,38 20,31 9,38 12,25 2,16 15,15" '+f+'/>';
+  return s+'</svg>';
+}
+function mcHtml(r){
+  var q=r.q,h='';
+  if(q.body){
+    h+='<div class="passage">'+esc(q.body)+'</div>';
+    if(q.read&&SPEECH&&!r.fb)h+='<button class="btn ghost sm" data-act="readq">Read it to me</button>';
+  }
+  if(q.seq)h+='<div class="seq">'+q.seq.map(function(t){return shapeSvg(t,56);}).join('')+'<div class="slotq">?</div></div>';
+  if(q.nums)h+='<div class="q">'+esc(q.nums)+'</div>';
+  h+='<div class="prompt">'+esc(q.prompt)+'</div>';
+  if(!r.fb){
+    var long=!q.shapes&&q.opts.some(function(o){return o.length>16;});
+    h+='<div class="opts'+(q.shapes?'':' txt')+(long?' col1':'')+'">'+q.opts.map(function(o){
+      return '<button class="btn" data-act="opt" data-v="'+esc(o)+'">'+(q.shapes?shapeSvg(o,44):esc(o))+'</button>';
+    }).join('')+'</div>';
+  }
+  return h;
+}
+function mcWrong(r){
+  var q=r.q;
+  return 'Not quite. The answer is <b>'+(q.shapes?shapeSvg(q.ans,30):esc(q.ans))+'</b>. '+esc(q.why||'');
+}
+/* ---------- actions ---------- */
+function openProfile(p,temp){
+  S.p=p;S.temp=temp;S.confirmDel=false;
+  if(!p.grp)p.grp={n:Math.round(p.xp/2),w:Math.round(p.xp/2)};if(!p.beaten)p.beaten=[];['vocab','logic'].forEach(function(k){if(!p.skills[k])p.skills[k]={lvl:(START[p.band]||START[2])[k],hist:[]};});p.wins=p.wins||0;p.losses=p.losses||0;
+  var today=new Date().toLocaleDateString('en-CA'),yest=new Date(Date.now()-864e5).toLocaleDateString('en-CA');
+  if(p.last!==today){p.days=(p.last===yest)?p.days+1:1;p.last=today;}
+  BADGES.forEach(function(b){if(p.badges.indexOf(b.id)<0&&b.t(p))p.badges.push(b.id);});
+  save();S.screen='home';render();
+}
+function typeSubmit(){
+  var r=S.round;syncInputs();var ok=r.cur.trim().toLowerCase()===r.word;if(r.cur.trim()==='')return;answer(ok);
+}
+var ACT={
+  arena:function(){S.screen='arena';S.B=null;render();},
+  foe:function(v){var f=FOES.filter(function(x){return x.id===v;})[0];S.B=newBattle(S.p,f);S.screen='battle';render();},
+  abil:function(v){var b=S.B;if(!b||b.over)return;if(playerAct(b,v)===false)return;if(b.over)finishBattle();render();if(b.over==='win')confetti(40);},
+  readq:function(){say(S.round.q.body);},
+  picker:function(){S.screen='picker';S.p=null;S.temp=false;S.round=null;render();},
+  open:function(v){openProfile(store.profiles[+v],false);},
+  new:function(){S.form={name:'',cname:'',type:'ember',band:1};S.screen='new';render();},
+  try:function(){openProfile(newProfile('Tester','ember','Sparky',2),true);},
+  fage:function(v){syncInputs();S.form.band=+v;render();},
+  ftype:function(v){syncInputs();S.form.type=v;render();},
+  create:function(){
+    syncInputs();var f=S.form,n=f.name.trim(),c=f.cname.trim();
+    if(!n||!c){view('<div class="card">Please fill in both names first.</div><button class="btn" data-act="new">Back</button>',0);return;}
+    var p=newProfile(n,f.type,c,f.band);store.profiles.push(p);S.temp=false;save();openProfile(p,false);
+  },
+  quest:function(v){startRound(v);},
+  home:function(){S.round=null;S.screen='home';S.confirmDel=false;if(SPEECH)try{speechSynthesis.cancel();}catch(e){}render();},
+  say:function(){speakWord();},
+  peek:function(){showPeek(false);},
+  hint:function(){S.round.hint=true;render();},
+  mode:function(v){syncInputs();S.p.pref.spell=v;S.round.placed=[];save();render();var a=document.getElementById('ans');if(a)a.focus();},
+  key:function(v){
+    var r=S.round;if(r.fb)return;
+    if(v==='back')r.cur=r.cur.slice(0,-1);
+    else if(v==='-')r.cur=r.cur.charAt(0)==='-'?r.cur.slice(1):'-'+r.cur;
+    else if(v==='.'||v==='/'){if(r.cur.indexOf('.')<0&&r.cur.indexOf('/')<0&&r.cur.replace('-','')!=='')r.cur+=v;}
+    else if(r.cur.length<9)r.cur+=v;
+    var b=document.getElementById('ansbox');if(b)b.innerHTML=r.cur||'&nbsp;';
+  },
+  submit:function(){
+    var r=S.round;if(r.fb)return;
+    if(r.quest==='spell'){
+      if(S.p.pref.spell==='tiles'){if(r.placed.length!==r.word.length)return;r.cur=r.placed.map(function(i){return r.tiles[i];}).join('');answer(r.cur===r.word);}
+      else typeSubmit();
+    }else{if(r.cur==='')return;answer(close(parseAns(r.cur),r.q.ans));}
+  },
+  opt:function(v){var r=S.round;if(r.fb)return;answer(v===r.q.ans);},
+  tile:function(v){var r=S.round;v=+v;if(r.placed.length<r.word.length&&r.placed.indexOf(v)<0){r.placed.push(v);render();}},
+  untile:function(v){var r=S.round;r.placed.splice(+v,1);render();},
+  next:function(){S.round.n>=S.round.total?finishRound():goNext();},
+  coll:function(){S.screen='coll';render();},
+  buy:function(k){var p=S.p,a=ACC[k];if(p.gems>=a.cost&&p.owned.indexOf(k)<0){p.gems-=a.cost;p.owned.push(k);p.worn.push(k);save();render();confetti(20);}},
+  wear:function(k){var p=S.p,i=p.worn.indexOf(k);if(i>=0)p.worn.splice(i,1);else p.worn.push(k);save();render();},
+  del:function(){S.confirmDel=true;render();},
+  delno:function(){S.confirmDel=false;render();},
+  delyes:function(){store.profiles=store.profiles.filter(function(x){return x!==S.p;});save();ACT.picker();},
+  cheat:function(v){
+    var p=S.p;if(!S.temp)return;
+    if(v==='xp100')p.xp+=100;else if(v==='xp500')p.xp+=500;else if(v==='gems')p.gems+=10;
+    else if(v==='balance'){p.grp.n=p.xp;p.grp.w=p.xp;}else if(v==='math4')p.skills.math.lvl=Math.min(MAXL.math,p.skills.math.lvl+4);
+    else if(v==='skill')Object.keys(p.skills).forEach(function(k){p.skills[k].lvl=Math.min(MAXL[k],p.skills[k].lvl+1);});
+    BADGES.forEach(function(b){if(p.badges.indexOf(b.id)<0&&b.t(p))p.badges.push(b.id);});render();
+  }
+};
+document.addEventListener('click',function(e){var b=e.target.closest('[data-act]');if(!b||b.disabled)return;var f=ACT[b.dataset.act];if(f)f(b.dataset.v,b);});
+document.addEventListener('keydown',function(e){
+  var r=S.round;if(S.screen!=='play'||!r||r.fb)return;
+  if(e.target&&e.target.id==='ans'){if(e.key==='Enter'){e.preventDefault();typeSubmit();}return;}
+  if(r.quest==='math'||r.quest==='miss'){
+    if(/^[0-9.\/-]$/.test(e.key))ACT.key(e.key);else if(e.key==='Backspace')ACT.key('back');else if(e.key==='Enter')ACT.submit();
+  }
+});
+if(SPEECH)try{speechSynthesis.getVoices();}catch(e){}
+load();render();
+</script>
+</body>
+</html>
